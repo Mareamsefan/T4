@@ -49,28 +49,40 @@
         const addJokeForm = document.getElementById('addJokeFormId');
 
         function displayJokes(jokes) {
-            jokesList.innerHTML = jokes.map(joke => `
+            //Måtte håndtere et objekt også, med å gjøre den om til en array:         
+            if (!Array.isArray(jokes)) {
+            console.log('Jokes is a single object, converting to array:', jokes);
+            jokes = [jokes]; 
+            }
+            jokesList.innerHTML = jokes?.map(joke => `
                 <article class="joke">
                     <h3>${joke.title}</h3>
                     <p>${joke.answer}</p>
                 </article>
-            `).join('');
+            `)?.join('');
         }
 
         async function fetchJokes() {
             // Fetch data fra server og legg det til i listen over
-            const dataFromServer = []
+            const resopnseFromServer = await fetch('http://localhost:3000/')
+            const dataFromServer = await resopnseFromServer.json(); 
             if(!dataFromServer.length) return
-            return [...dadjokes, ...dataFromServer];
+            return [ ...dataFromServer];
         }
 
         // Function to post a new joke (simulated)
         async function postJoke(joke) {
+            const {title, answer} = joke 
             console.log('Posting new joke:', joke);
+
             // Send data til server og legg til i listen under
-            const createdJoke = {}
-            dadJokes.push(createdJoke);
-            displayJokes(dadJokes);
+            const createdJokeResponse = await fetch('http://localhost:3000/add', {
+              method: 'POST', 
+              headers: {"Content-Type": "application/json"},
+              body: JSON.stringify(joke)
+            })
+            const DadJokesWithNewCreatedJoke = await createdJokeResponse.json()
+            displayJokes(DadJokesWithNewCreatedJoke);
         }
 
         addJokeForm.addEventListener('submit', async (e) => {
